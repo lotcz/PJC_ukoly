@@ -1,4 +1,4 @@
-PROJECT_NAME = tiny-02
+PROJECT_NAME = tiny-03
 ARCHIVE_NAME = $(PROJECT_NAME).zip
 DEST_DIR = result
 COMPILER = x86_64-w64-mingw32-g++.exe#mingw32-g++.exe #g++
@@ -18,6 +18,10 @@ mem:
 	drmemory $(PROJECT_NAME)-test.exe
 
 memtest: test mem
+
+simple:
+	$(COMPILER) -g -std=c++11 $(PROJECT_NAME).cpp main-$(PROJECT_NAME).cpp -o $(PROJECT_NAME)
+	$(PROJECT_NAME).exe
 
 clean:
 	if [ -f "tests-main.o" ];then rm "tests-main.o";fi
