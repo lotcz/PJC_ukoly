@@ -13,10 +13,6 @@ test:
 	g++ -std=c++11 tests-main.o tests-tiny-01.o tiny-01.cpp -o tiny01-test
 	tiny01-test.exe
 
-t:
-	g++ -std=c++11 tests-main.cpp tests-tiny-01.cpp tiny-01.cpp -o tiny01-test
-	tiny01-test.exe
-
 clean:
 	if [ -f "tests-main.o" ];then rm "tests-main.o" -rf;fi
 	if [ -d "$(DEST_DIR_FULL)" ];then rm "$(DEST_DIR_FULL)" -rf;fi
@@ -25,6 +21,7 @@ clean:
 move_sources:
 	mkdir "$(DEST_DIR_FULL)"
 	xargs -a listfile.txt cp -t "$(DEST_DIR_FULL)"
+	rm "$(DEST_DIR_FULL)" -rf
 
 create_archive:
 	7z a -tzip $(DEST_ARCHIVE_FULL) "./$(DEST_DIR_FULL)/*"
