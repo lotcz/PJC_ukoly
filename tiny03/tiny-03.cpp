@@ -6,13 +6,15 @@
 #include <algorithm>
 
 class fixed_array {
-    int* m_data = nullptr;
+    int* m_data;
     size_t m_size = 0;
 public:
-    fixed_array(size_t size):
-        m_size(size),
-        m_data(new int[m_size])
-    {}
+
+    fixed_array(size_t size) {
+        m_size = size;
+        m_data = new int[m_size];
+    }
+
     ~fixed_array() {
         delete[] m_data;
     }
@@ -20,9 +22,15 @@ public:
     int& at(size_t idx) {
         return m_data[idx];
     }
+
     int const& at(size_t idx) const {
         return m_data[idx];
     }
+
+    void set(size_t id, int& value) {
+        m_data[id] = value;
+    }
+
     int* data() {
         return m_data;
     }
@@ -31,19 +39,6 @@ public:
         return m_size;
     }
 
-    fixed_array(fixed_array&& rhs):
-        m_data(rhs.m_data),
-        m_size(rhs.m_size) {
-        rhs.m_data = nullptr;
-        rhs.m_size = 0;
-    }
-    fixed_array& operator=(fixed_array&& rhs) {
-        m_data = rhs.m_data;
-        rhs.m_data = nullptr;
-        m_size = rhs.m_size;
-        rhs.m_size = 0;
-        return *this;
-    }
 };
 
 fixed_array parse_line(std::string const& line) {
@@ -52,9 +47,10 @@ fixed_array parse_line(std::string const& line) {
     sstr >> line_size;
 
     fixed_array fa(line_size);
-
+    int value;
     for (size_t i = 0; i < line_size; ++i) {
-        sstr >> fa.at(i);
+        sstr >> value;
+        fa.set(i, value);
     }
     return fa;
 }
@@ -68,13 +64,12 @@ bool validate_data(fixed_array const& data) {
     return true;
 }
 
-
 std::vector<statistics> summarize_data(std::istream& in) {
     std::vector<statistics> summary;
 
     std::string line;
     while (std::getline(in, line)) {
-        auto data = parse_line(line);
+        fixed_array data = parse_line(line);
         if (validate_data(data)) {
             std::sort(data.data(), data.data()+data.size());
             auto median = (data.size() % 2 == 1)?

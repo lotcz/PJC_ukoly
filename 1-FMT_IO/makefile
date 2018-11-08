@@ -1,4 +1,4 @@
-PROJECT_NAME = tiny-03
+PROJECT_NAME = small1
 ARCHIVE_NAME = $(PROJECT_NAME).zip
 DEST_DIR = result
 COMPILER = x86_64-w64-mingw32-g++.exe#mingw32-g++.exe #g++
