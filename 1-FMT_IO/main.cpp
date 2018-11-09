@@ -22,4 +22,7 @@ int main() {
   auto temp = parse_matrix(str);
   output_value("first", temp.first);
   output_value("second", temp.second);
+
+  std::vector<std::string> vec = {"abcd", "def", "ghi", "jkl"};
+  print_table(str, vec);
 }

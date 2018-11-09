@@ -1,13 +1,12 @@
-#include "catch.hpp"
-
-#include "small1.hpp"
-
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <limits>
 #include <random>
 #include <iomanip>
+
+#include "catch.hpp"
+#include "small1.hpp"
 
 namespace {
 

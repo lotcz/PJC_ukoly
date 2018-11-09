@@ -11,7 +11,7 @@ build_o:
 	$(COMPILER) -std=c++14 tests-main.cpp tests-$(PROJECT_NAME).cpp -c
 
 test:
-	$(COMPILER) -g -std=c++14 tests-main.o tests-$(PROJECT_NAME).o $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
+	$(COMPILER) -g -std=c++14 tests-main.o tests-$(PROJECT_NAME).o table-printer.cpp matrix-parser.cpp $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
 mem:
@@ -20,7 +20,7 @@ mem:
 memtest: test mem
 
 simple:
-	$(COMPILER) -g -std=c++11 $(PROJECT_NAME).cpp main.cpp -o $(PROJECT_NAME)
+	$(COMPILER) -g -std=c++14 table-printer.cpp matrix-parser.cpp $(PROJECT_NAME).cpp main.cpp -o $(PROJECT_NAME)
 	$(PROJECT_NAME).exe
 
 clean:
