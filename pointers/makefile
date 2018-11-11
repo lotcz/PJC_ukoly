@@ -6,6 +6,7 @@ default: clean build
 
 build:
 	$(COMPILER) -std=c++14 main.cpp -o $(PROJECT_NAME)
+	$(PROJECT_NAME).exe
 
 clean:
 	if [ -f "$(PROJECT_NAME).exe" ];then rm "$(PROJECT_NAME).exe";fi
