@@ -1,6 +1,8 @@
 #include "small1.hpp"
 #include "matrix-parser.hpp"
 #include "table-printer.hpp"
+#include "line-validator.hpp"
+#include "number-comparer.hpp"
 
 /**
 * Načtení matice ze vstupu.
@@ -19,14 +21,15 @@ void print_table(std::ostream& out, const std::vector<std::string>& vec) {
 
 /**
 * Verifikace formátovaného vstupu
+* The expected format is [true/false] [octal number] [decimal number] [hexadecimal number]
 */
 bool validate_line(const std::string& str) {
-    return true;
+  return LineValidator::validate_line(str);
 }
 
 /**
 * Porovnání dlouhých čísel
 */
 std::string max_number(std::istream& in) {
-    return {};
+  return NumberComparer::max_number(in);
 }
