@@ -57,26 +57,55 @@ bool BST::contains(double value) const {
     return false;
 }
 
-BST::BST(BST const& rhs) = default;
-BST& BST::operator=(BST const& rhs) = default;
-BST::BST(BST&& rhs) = default;
-BST& BST::operator=(BST&& rhs) = default;
-
-BST::~BST() {
-    if (m_root) {
-        std::stack<node*> nodes;
-        nodes.push(m_root);
-
-        while (!nodes.empty()) {
-            auto current = nodes.top(); nodes.pop();
-            if (current->left) {
-                nodes.push(current->left);
-            }
-            if (current->right) {
-                nodes.push(current->right);
-            }
-            delete current;
-        }
-    }
+BST::BST(BST const& rhs) {
+  std::vector<double> elements = rhs.preorder_elements();
+  for (auto elem : elements) {
+    this->add(elem);
+  }
 }
 
+BST& BST::operator=(BST const& rhs) {
+  this->~BST();
+  this->m_root = nullptr;
+  std::vector<double> elements = rhs.preorder_elements();
+  for (auto elem : elements) {
+    this->add(elem);
+  }
+  return *this;
+}
+
+BST::BST(BST&& rhs) {
+  std::vector<double> elements = rhs.preorder_elements();
+  rhs.~BST();
+  for (auto elem : elements) {
+    this->add(elem);
+  }
+}
+
+BST& BST::operator=(BST&& rhs) {
+  this->~BST();
+  this->m_root = nullptr;
+  std::vector<double> elements = rhs.preorder_elements();
+  for (auto elem : elements) {
+    this->add(elem);
+  }
+  return *this;
+}
+
+BST::~BST() {
+  if (m_root) {
+    std::stack<node*> nodes;
+    nodes.push(m_root);
+
+    while (!nodes.empty()) {
+      auto current = nodes.top(); nodes.pop();
+      if (current->left) {
+        nodes.push(current->left);
+      }
+      if (current->right) {
+        nodes.push(current->right);
+      }
+      delete current;
+    }
+  }
+}
