@@ -76,7 +76,6 @@ BST& BST::operator=(BST const& rhs) {
 
 BST::BST(BST&& rhs) {
   std::vector<double> elements = rhs.preorder_elements();
-  rhs.~BST();
   for (auto elem : elements) {
     this->add(elem);
   }

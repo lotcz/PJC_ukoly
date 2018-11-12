@@ -11,10 +11,11 @@ build_o:
 	$(COMPILER) -std=c++14 tests-main.cpp tests-$(PROJECT_NAME).cpp -c
 
 test:
-	$(COMPILER) -g -std=c++14 tests-main.o tests-$(PROJECT_NAME).o $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
+	$(COMPILER) -std=c++14 tests-main.o tests-$(PROJECT_NAME).o $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
 mem:
+	$(COMPILER) -g -std=c++14 tests-main.o tests-$(PROJECT_NAME).o $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
 	drmemory $(PROJECT_NAME)-test.exe
 
 memtest: test mem
