@@ -33,12 +33,23 @@ flat_set<T> make_flat_set(std::vector<T> const &v) {
 int main() {
   try {
 
-    flat_set<int, std::greater<int>> fs;
-    std::vector<int> elems = {5, 0, 0, 1, 9, 2};
-    fs.insert(elems.begin(), elems.end());
-    output_value("size", fs.size());
-    output_set("set", &fs); //0, 1, 2, 5, 9
+    auto my_lesser = [] (int a, int b) {return a < b; };
+    auto my_greater = [] (int a, int b) {return a > b; };
+    std::vector<int> e{ 0,1,2,3 };
+    flat_set<int, bool(*)(int, int)> l1(e.begin(), e.end(), my_lesser);
+    flat_set<int, bool(*)(int, int)> l2(e.begin(), e.end(), my_greater);
 
+    output_set("set 1", &l1);
+    output_set("set 2", &l2);
+
+    l1.swap(l2);
+
+    output_set("set 1 swapped", &l1);
+    output_set("set 2 swapped", &l2);
+    /*
+    l1.insert(100);
+    l2.insert(-100);
+    */
 
   } catch (std::exception e) {
     output_value("ex:", e.what());

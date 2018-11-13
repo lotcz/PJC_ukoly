@@ -14,6 +14,9 @@ test:
 	$(COMPILER) -g -std=c++14 tests-main.o tests-helpers.o test_$(PROJECT_NAME).o $(PROJECT_NAME).hpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
+debug:
+	gdb $(PROJECT_NAME)-test.exe
+
 mem:
 	drmemory $(PROJECT_NAME)-test.exe
 

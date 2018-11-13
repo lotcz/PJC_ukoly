@@ -12,13 +12,12 @@ class flat_set {
 
     bool value_equals(T v1, T v2) {
       return (!(this->m_comparator(v1, v2) || (this->m_comparator(v2, v1))));
-      //return false;
     }
 
     my_iterator find_value_iterator(T value) {
       my_iterator it = this->begin();
       while (it != this->end() && (this->m_comparator(*it, value))) {
-        ++it;
+        it++;
       }
       return it;
     }
@@ -28,33 +27,35 @@ class flat_set {
     my_const_iterator find_value_const_iterator(T value) {
       my_const_iterator it = this->cbegin();
       while (it != this->cend() && (this->m_comparator(*it, value))) {
-        ++it;
+        it++;
       }
       return it;
     }
 
     std::pair<my_iterator, bool> insert_value(T value) {
       my_iterator it = this->find_value_iterator(value);
-      if (it == this->end()) {
-        return make_pair(this->m_values.insert(it, value), true);
+      if ((it != this->end()) && (this->value_equals(*it, value))) {
+        return make_pair(it, false);
       } else {
-        if (this->value_equals(*it, value)) {
-          return make_pair(it, false);
-        } else {
-          return make_pair(this->m_values.insert(it, value), true);
-        }
+        return make_pair(this->m_values.insert(it, value), true);
       }
     }
 
     template <typename InputIterator>
     void from_iterator(InputIterator first, InputIterator last) {
-      for (auto it = first; it != last; ++it) {
-        this->insert_value(*it);
+      if (first != last) {
+        for (auto it = first; it != last; it++) {
+          this->insert_value(*it);
+        }
       }
     }
 
-    void from_flat_set(const flat_set* fs) {
-      this->from_iterator(fs->begin(), fs->end());
+    void from_flat_set(const flat_set<T, Comparator>* fs) {
+      this->clear();
+      m_comparator = fs->getComparator();
+      if (!fs->empty()) {
+        this->from_iterator(fs->cbegin(), fs->cend());
+      }
     }
 
   public:
@@ -63,34 +64,36 @@ class flat_set {
     typedef my_iterator iterator;
     typedef my_const_iterator const_iterator;
 
-    flat_set() = default;
+    flat_set<T, Comparator>() = default;
 
-    flat_set(Comparator const& cmp) {
+    flat_set<T, Comparator>(Comparator const& cmp) {
       m_comparator = cmp;
     }
 
-    flat_set(flat_set const& rhs) {
+    flat_set<T, Comparator>(flat_set<T, Comparator> const& rhs) {
       this->from_flat_set(&rhs);
     }
 
-    flat_set(flat_set && rhs) {
+    flat_set<T, Comparator>(flat_set<T, Comparator> && rhs) {
       this->from_flat_set(&rhs);
     }
 
-    flat_set& operator=(flat_set const& rhs) {
+    flat_set<T, Comparator>& operator=(flat_set<T, Comparator> const& rhs) {
       this->clear();
       this->from_flat_set(&rhs);
       return *this;
     }
 
-    flat_set& operator=(flat_set && rhs) {
-      this->clear();
-      this->from_flat_set(&rhs);
-      return *this;
+    flat_set<T, Comparator>& operator=(flat_set<T, Comparator> && rhs) {
+      return *rhs;
     }
 
     ~flat_set() {
 
+    }
+
+    Comparator getComparator() const {
+      return m_comparator;
     }
 
     // Constructs flat_set from elements in range [first, last)
@@ -241,14 +244,9 @@ class flat_set {
       return it;
     }
 
-    void swap(flat_set& o) {
-      flat_set f3;
-      f3 = o;
-      o.clear();
-      for (iterator it = this->begin(); it != this->end(); ++it) {
-        o.insert(*it);
-      }
-      this->clear();
+    void swap(flat_set<T, Comparator>& o) {
+      flat_set<T, Comparator> f3 = flat_set<T, Comparator>(o);
+      o.from_flat_set(this);
       this->from_flat_set(&f3);
     }
 
