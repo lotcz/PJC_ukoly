@@ -1,9 +1,1 @@
-matrix-parser.hpp
-matrix-parser.cpp
-table-printer.hpp
-table-printer.cpp
-line-validator.hpp
-line-validator.cpp
-number-comparer.hpp
-number-comparer.cpp
-small1.cpp
+flatset.hpp
