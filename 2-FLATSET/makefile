@@ -7,11 +7,11 @@ default: create_archive
 
 build:
 	if [ -f "tests-main.o" ];then rm "tests-main.o";fi
-	if [ -f "tests-$(PROJECT_NAME).o" ];then rm "tests-$(PROJECT_NAME).o";fi
-	$(COMPILER) -g -std=c++14 tests-main.cpp tests-helpers.cpp test_$(PROJECT_NAME).cpp -c
+	if [ -f "tests-helpers.o" ];then rm "tests-helpers.o";fi
+	$(COMPILER) -g -std=c++14 tests-main.cpp tests-helpers.cpp -c
 
 test:
-	$(COMPILER) -g -std=c++14 tests-main.o tests-helpers.o test_$(PROJECT_NAME).o $(PROJECT_NAME).hpp -o $(PROJECT_NAME)-test
+	$(COMPILER) -g -std=c++14 tests-main.o tests-helpers.o test_$(PROJECT_NAME).cpp $(PROJECT_NAME).hpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
 debug:

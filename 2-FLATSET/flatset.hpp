@@ -34,10 +34,20 @@ class flat_set {
 
     std::pair<my_iterator, bool> insert_value(T value) {
       my_iterator it = this->find_value_iterator(value);
-      if ((it != this->end()) && (this->value_equals(*it, value))) {
-        return make_pair(it, false);
+      bool can_insert = false;
+
+      if (it == this->end()) {
+        can_insert = true;
       } else {
+        if (!(this->value_equals(*it, value))) {
+          can_insert = true;
+        }
+      }
+
+      if (can_insert) {
         return make_pair(this->m_values.insert(it, value), true);
+      } else {
+        return make_pair(it, false);
       }
     }
 
@@ -85,7 +95,7 @@ class flat_set {
     }
 
     flat_set<T, Comparator>& operator=(flat_set<T, Comparator> && rhs) {
-      return *rhs;
+      return rhs;
     }
 
     ~flat_set() {
