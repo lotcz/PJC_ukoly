@@ -68,7 +68,6 @@ namespace {
 
     unsigned MyKey::s_nconstructs = 0;
 
-
     std::mt19937 mt{ std::random_device{}() };
     std::uniform_int_distribution<> dist(INT_MIN, INT_MAX);
 
