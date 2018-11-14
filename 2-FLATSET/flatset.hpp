@@ -5,10 +5,32 @@
 template <typename T, typename Comparator = std::less<T> >
 class flat_set {
   private:
-    std::vector<T> m_values;
+    std::vector<T*> m_values;
     Comparator m_comparator;
 
-    typedef typename std::vector<T>::iterator my_iterator;
+    class my_own_iterator: public std::iterator<
+      std::input_iterator_tag,   // iterator_category
+      T,                         // value_type
+      T,                         // difference_type
+      const T*,                  // pointer
+      T                          // reference
+    >{
+
+      public:
+        typedef typename std::vector<T*>::iterator orig_iterator_type;
+        orig_iterator_type* orig;
+
+        explicit my_own_iterator(orig_iterator_type* orig_iterator) {
+          orig = orig_iterator;
+        }
+        my_own_iterator& operator++() {*orig++; return *this;}
+        my_own_iterator operator++(int) {my_own_iterator retval = *this; ++(*this); return retval;}
+        bool operator==(my_own_iterator other) const {return **this == *other;}
+        bool operator!=(my_own_iterator other) const {return !(**this == *other);}
+        T operator*() const {return *(*(*orig));}
+    };
+
+    typedef my_own_iterator my_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
@@ -36,20 +58,23 @@ class flat_set {
       return it;
     }
 
-    std::pair<my_iterator, bool> insert_value(T const& value) {
-      my_iterator it = this->find_value_iterator(value);
+    std::pair<my_iterator, bool> insert_value(T* value) {
+      my_iterator it = this->find_value_iterator(*value);
       bool can_insert = false;
 
       if (it == this->end()) {
         can_insert = true;
       } else {
-        if (!(this->value_equals(*it, value))) {
+        if (!(this->value_equals(*it, *value))) {
           can_insert = true;
         }
       }
 
       if (can_insert) {
-        return make_pair(this->m_values.insert(it, value), true);
+        typename my_iterator::orig_iterator_type* orig_iter = it.orig;
+        typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.insert(*orig_iter, value);
+        my_iterator new_iter = my_iterator(orig_iter);
+        return make_pair(new_iter, true);
       } else {
         return make_pair(it, false);
       }
@@ -129,11 +154,11 @@ class flat_set {
 
     // Insert overloads
     std::pair<iterator, bool> insert(T const& v) {
-      return this->insert_value(v);
+      return this->insert_value(&v);
     }
 
     std::pair<iterator, bool> insert(T&& v) {
-      return this->insert_value(v);
+      return this->insert_value(&v);
     }
 
     // Inserts [first, last) range of elements
@@ -144,11 +169,13 @@ class flat_set {
 
     // Iterator member functions
     iterator begin() noexcept {
-      return this->m_values.begin();
+      typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.begin();
+      return iterator(&new_orig_iter);
     }
 
     iterator end() noexcept {
-      return this->m_values.end();
+      typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.end();
+      return iterator(&new_orig_iter);
     }
 
     const_iterator begin() const noexcept {
@@ -218,12 +245,12 @@ class flat_set {
     // Erase overloads
     // Deletes element pointed-to by i, returns iterator to the next element
     iterator erase(const_iterator i) {
-      return this->m_values.erase(i);
+      return iterator(this->m_values.erase(i));
     }
 
     // Deletes elements in range [first, last), returns iterator to the next element
     iterator erase(const_iterator first, const_iterator last) {
-      return this->m_values.erase(first, last);
+      return iterator(this->m_values.erase(first, last));
     }
 
     // Deletes element equal to key if it is present, returns how many elements were deleted
