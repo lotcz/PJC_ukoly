@@ -40,30 +40,11 @@ class flat_set {
       return it;
     }
 
-    std::pair<my_iterator, bool> insert_value(T const& value) {
-      my_iterator it = this->find_value_iterator(value);
-      bool can_insert = false;
-      if (it == this->end()) {
-        can_insert = true;
-      } else {
-        if (!(this->value_equals(*it, value))) {
-          can_insert = true;
-        }
-      }
-
-      if (can_insert) {
-        return make_pair(this->m_values.insert(it, std::move(value)), true);
-      } else {
-        return make_pair(it, false);
-      }
-
-    }
-
     template <typename InputIterator>
     void from_iterator(InputIterator first, InputIterator last) {
       if (first != last) {
         for (auto it = first; it != last; it++) {
-          this->insert_value(*it);
+          this->insert(*it);
         }
       }
     }
@@ -128,11 +109,39 @@ class flat_set {
 
     // Insert overloads
     std::pair<iterator, bool> insert(T const& v) {
-      return this->insert_value(v);
+      my_iterator it = this->find_value_iterator(v);
+      bool can_insert = false;
+      if (it == this->end()) {
+        can_insert = true;
+      } else {
+        if (!(this->value_equals(*it, v))) {
+          can_insert = true;
+        }
+      }
+
+      if (can_insert) {
+        return make_pair(this->m_values.insert(it, v), true);
+      } else {
+        return make_pair(it, false);
+      }
     }
 
     std::pair<iterator, bool> insert(T&& v) {
-      return this->insert_value(v);
+      my_iterator it = this->find_value_iterator(v);
+      bool can_insert = false;
+      if (it == this->end()) {
+        can_insert = true;
+      } else {
+        if (!(this->value_equals(*it, v))) {
+          can_insert = true;
+        }
+      }
+
+      if (can_insert) {
+        return make_pair(this->m_values.insert(it, std::move(v)), true);
+      } else {
+        return make_pair(it, false);
+      }
     }
 
     // Inserts [first, last) range of elements

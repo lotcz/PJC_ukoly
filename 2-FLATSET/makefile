@@ -1,7 +1,7 @@
 PROJECT_NAME = flatset
 ARCHIVE_NAME = $(PROJECT_NAME).zip
 DEST_DIR = result
-COMPILER = g++#x86_64-w64-mingw32-g++.exe#mingw32-g++.exe #g++
+COMPILER = x86_64-w64-mingw32-g++.exe#mingw32-g++.exe #g++
 
 default: create_archive
 
