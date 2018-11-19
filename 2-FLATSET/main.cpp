@@ -26,17 +26,41 @@ flat_set<T> make_flat_set(std::vector<T> const &v) {
   return flat_set<T>(v.begin(), v.end());
 }
 
+
+class MyKey {
+    friend struct MyKeyComparator;
+    int i;
+    static unsigned s_nconstructs;
+    operator int() const {return i;}
+public:
+    static unsigned nconstructs() {return s_nconstructs;}
+
+    explicit MyKey(int i = 0) : i(i) {s_nconstructs++;}
+    MyKey(const MyKey &o) : i(o.i) {s_nconstructs++;}
+    MyKey& operator=(const MyKey &o) {i = o.i; s_nconstructs++; return *this;}
+    MyKey(MyKey &&o) = default;
+    MyKey& operator=(MyKey &&o) = default;
+};
+
+
+struct MyKeyComparator {
+    bool operator()(MyKey const &a, MyKey const &b) const {
+      return a.i < b.i;
+    }
+};
+
+unsigned MyKey::s_nconstructs = 0;
+
 int main() {
   try {
+
     flat_set<tracker> fs;
     tracker t(1);
     auto start = tracker::cnt;
-    output_field("start", start);
     fs.insert(std::move(t));
     auto t1 = tracker::cnt;
-    output_field("t1   ", t1);
+    output_field("after insert", t1 );
 
-    //output_set("fs", &fs);
   } catch (std::exception e) {
     output_field("ex:", e.what());
   }

@@ -1,3 +1,5 @@
+#include <iostream>
+
 template <typename T>
 void output(T value) {
   std::cout << value;

@@ -5,35 +5,19 @@
 template <typename T, typename Comparator = std::less<T> >
 class flat_set {
   private:
-    std::vector<T*> m_values;
+    std::vector<T> m_values;
     Comparator m_comparator;
 
-    class my_own_iterator: public std::iterator<
-      std::input_iterator_tag,   // iterator_category
-      T,                         // value_type
-      T,                         // difference_type
-      const T*,                  // pointer
-      T                          // reference
-    >{
-
-      public:
-        typedef typename std::vector<T*>::iterator orig_iterator_type;
-        orig_iterator_type* orig;
-
-        explicit my_own_iterator(orig_iterator_type* orig_iterator) {
-          orig = orig_iterator;
-        }
-        my_own_iterator& operator++() {*orig++; return *this;}
-        my_own_iterator operator++(int) {my_own_iterator retval = *this; ++(*this); return retval;}
-        bool operator==(my_own_iterator other) const {return **this == *other;}
-        bool operator!=(my_own_iterator other) const {return !(**this == *other);}
-        T operator*() const {return *(*(*orig));}
-    };
-
-    typedef my_own_iterator my_iterator;
+    typedef typename std::vector<T>::iterator my_iterator;
+    typedef typename std::vector<T>::const_iterator my_const_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
+    }
+
+    static bool values_equal(T const& v1, T const& v2) {
+      Comparator cmp;
+      return values_equal(cmp, v1, v2);
     }
 
     bool value_equals(T const& v1, T const& v2) {
@@ -48,8 +32,6 @@ class flat_set {
       return it;
     }
 
-    typedef typename std::vector<T>::const_iterator my_const_iterator;
-
     my_const_iterator find_value_const_iterator(T const& value) {
       my_const_iterator it = this->cbegin();
       while (it != this->cend() && (this->m_comparator(*it, value))) {
@@ -58,26 +40,23 @@ class flat_set {
       return it;
     }
 
-    std::pair<my_iterator, bool> insert_value(T* value) {
-      my_iterator it = this->find_value_iterator(*value);
+    std::pair<my_iterator, bool> insert_value(T const& value) {
+      my_iterator it = this->find_value_iterator(value);
       bool can_insert = false;
-
       if (it == this->end()) {
         can_insert = true;
       } else {
-        if (!(this->value_equals(*it, *value))) {
+        if (!(this->value_equals(*it, value))) {
           can_insert = true;
         }
       }
 
       if (can_insert) {
-        typename my_iterator::orig_iterator_type* orig_iter = it.orig;
-        typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.insert(*orig_iter, value);
-        my_iterator new_iter = my_iterator(orig_iter);
-        return make_pair(new_iter, true);
+        return make_pair(this->m_values.insert(it, std::move(value)), true);
       } else {
         return make_pair(it, false);
       }
+
     }
 
     template <typename InputIterator>
@@ -102,11 +81,6 @@ class flat_set {
     typedef typename std::vector<T>::size_type size_type;
     typedef my_iterator iterator;
     typedef my_const_iterator const_iterator;
-
-    static bool values_equal(T const& v1, T const& v2) {
-      Comparator cmp;
-      return values_equal(cmp, v1, v2);
-    }
 
     flat_set<T, Comparator>() = default;
 
@@ -154,11 +128,11 @@ class flat_set {
 
     // Insert overloads
     std::pair<iterator, bool> insert(T const& v) {
-      return this->insert_value(&v);
+      return this->insert_value(v);
     }
 
     std::pair<iterator, bool> insert(T&& v) {
-      return this->insert_value(&v);
+      return this->insert_value(v);
     }
 
     // Inserts [first, last) range of elements
@@ -169,21 +143,19 @@ class flat_set {
 
     // Iterator member functions
     iterator begin() noexcept {
-      typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.begin();
-      return iterator(&new_orig_iter);
+      return this->m_values.begin();
     }
 
     iterator end() noexcept {
-      typename my_iterator::orig_iterator_type new_orig_iter = this->m_values.end();
-      return iterator(&new_orig_iter);
+      return  this->m_values.end();
     }
 
     const_iterator begin() const noexcept {
-      return this->m_values.cbegin();
+      return this->cbegin();
     }
 
     const_iterator end() const noexcept {
-      return this->m_values.cend();
+      return this->cend();
     }
 
     const_iterator cbegin() const noexcept {
@@ -304,9 +276,9 @@ class flat_set {
 template <typename T, typename Comparator>
 char elements_equal(flat_set<T, Comparator> const& a, flat_set<T, Comparator> const& b) {
   Comparator cmp;
-  typename flat_set<T, Comparator>::const_iterator ita = a.begin();
-  typename flat_set<T, Comparator>::const_iterator itb = b.begin();
-  while (ita != a.end() && itb != b.end()) {
+  typename flat_set<T, Comparator>::const_iterator ita = a.cbegin();
+  typename flat_set<T, Comparator>::const_iterator itb = b.cbegin();
+  while (ita != a.cend() && itb != b.cend()) {
     if (cmp(*ita, *itb)) {
       return -1;
     } else if (cmp(*itb, *ita)) {
@@ -316,9 +288,9 @@ char elements_equal(flat_set<T, Comparator> const& a, flat_set<T, Comparator> co
       itb++;
     }
   }
-  if (ita != a.end()) {
+  if (ita != a.cend()) {
     return 1;
-  } else if (itb != b.end()) {
+  } else if (itb != b.cend()) {
     return -1;
   } else {
     return 0;
