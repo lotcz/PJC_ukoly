@@ -59,6 +59,10 @@ int main() {
       output_iterator("find", it, (it+1) );
     }
 
+    flat_set<int>::iterator end = fs.end();
+
+    output_iterator("last", --end, end );
+
   } catch (std::exception e) {
     output_field("ex:", e.what());
   }

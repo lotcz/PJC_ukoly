@@ -1,11 +1,55 @@
 #include <iostream>
 #include "../output.cpp"
 
-class MyIterator {
+class MySet {
 private:
   int* m_values = nullptr;
   int m_length = 0;
 public:
+
+  class MyIterator {
+  private:
+    int* m_current = nullptr;
+    MySet* m_set = nullptr;
+  public:
+
+    MyIterator(MySet* src, bool is_end) {
+      m_set = src;
+      if (is_end && m_set->m_values != nullptr) {
+        m_current = m_set->m_values+m_set->m_length;
+      } else {
+        m_current = m_set->m_values;
+      }
+    }
+
+    MyIterator(MySet* src) {
+      MyIterator(src, false);
+    }
+
+    MyIterator operator--() {
+       m_current -= 1;
+       return *this;
+    }
+
+    MyIterator operator++() {
+       m_current += 1;
+       return *this;
+    }
+
+    MyIterator operator++(int) {
+       m_current += 1;
+       return *this;
+    }
+
+    int operator*() {
+       return *m_current;
+    }
+
+    bool operator!=(MyIterator other) {
+      return (this->m_current != other.m_current);
+    }
+
+  };
 
   int* getValues() {
     return m_values;
@@ -15,12 +59,12 @@ public:
     return m_length;
   }
 
-  int* begin() {
-    return m_values;
+  MyIterator begin() {
+    return MyIterator(this, false);
   }
 
-  int* end() {
-    return begin()+m_length;
+  MyIterator end() {
+    return MyIterator(this, true);
   }
 
   void add(int value) {
@@ -35,12 +79,13 @@ public:
 };
 
 int main() {
-  MyIterator it;
-  it.add(1);
-  it.add(2);
-  it.add(3);
-  it.add(10);
-  output_array("Values", it.getValues(), it.getLength());
-  output_iterator("test", it.begin(), it.end());
+  MySet fs;
+  fs.add(1);
+  fs.add(2);
+  fs.add(3);
+  fs.add(10);
+  output_array("Values", fs.getValues(), fs.getLength());
+  output_iterator("Iterator", fs.begin(), fs.end());
+  output_iterator("Last", --fs.end(), fs.end());
 
 }

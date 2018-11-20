@@ -10,8 +10,56 @@ class flat_set {
     int m_length = 0;
     Comparator m_comparator;
 
-    typedef T* my_iterator;
-    typedef const T* my_const_iterator;
+    class MyIterator {
+    private:
+      int* m_current = nullptr;
+      flat_set<T, Comparator>* m_set = nullptr;
+    public:
+      MyIterator(flat_set<T, Comparator>* src, bool is_end) {
+        m_set = src;
+        if (is_end && m_set->m_values != nullptr) {
+          m_current = m_set->m_values+m_set->m_length;
+        } else {
+          m_current = m_set->m_values;
+        }
+      }
+
+      MyIterator(flat_set<T, Comparator>* src) {
+        MyIterator(src, false);
+      }
+
+      MyIterator operator--() {
+         m_current -= 1;
+         return *this;
+      }
+
+      MyIterator operator++() {
+         m_current += 1;
+         return *this;
+      }
+
+      MyIterator operator++(int) {
+         m_current += 1;
+         return *this;
+      }
+
+      MyIterator operator+(int add) {
+         m_current += add;
+         return *this;
+      }
+
+
+      T operator*() {
+         return *m_current;
+      }
+
+      bool operator!=(MyIterator other) {
+        return (this->m_current != other.m_current);
+      }
+    };
+
+    typedef MyIterator my_iterator;
+    typedef MyIterator my_const_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
@@ -173,7 +221,7 @@ class flat_set {
     }
 
     iterator end() noexcept {
-      auto it = this->m_values + this->m_length;
+      iterator it = this->m_values + this->m_length;
       return it;
     }
 
