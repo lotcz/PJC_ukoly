@@ -53,6 +53,12 @@ int main() {
     fs.erase(1);
     fs.erase(4);
     output_set("after erase", &fs );
+
+    auto it = fs.find(5);
+    if (it != fs.end()) {
+      output_iterator("find", it, (it+1) );
+    }
+
   } catch (std::exception e) {
     output_field("ex:", e.what());
   }

@@ -11,7 +11,7 @@ class flat_set {
     Comparator m_comparator;
 
     typedef T* my_iterator;
-    typedef my_iterator my_const_iterator;
+    typedef const T* my_const_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
@@ -173,7 +173,8 @@ class flat_set {
     }
 
     iterator end() noexcept {
-      return this->m_values + this->m_length;
+      auto it = this->m_values + this->m_length;
+      return it;
     }
 
     const_iterator begin() const noexcept {
@@ -218,7 +219,7 @@ class flat_set {
     // Lookup member functions
     // Returns iterator to element equivalent to v, or an end iterator if such element is not present
     iterator find(T const& v) {
-      my_iterator it = this->find_value_iterator(v);
+      iterator it = this->find_value_iterator(v);
       if (it == this->end()) {
         return it;
       } else {
@@ -231,7 +232,7 @@ class flat_set {
     }
 
     const_iterator find(T const& v) const {
-      my_const_iterator it = this->find_value_const_iterator(v);
+      const_iterator it = this->find_value_const_iterator(v);
       if (it == this->cend()) {
         return it;
       } else {
@@ -264,7 +265,7 @@ class flat_set {
 
         old_it++;
         result_it = old_it;
-        
+
         while (old_it != this->end()) {
           *new_it = *old_it;
           new_it++;
@@ -278,7 +279,7 @@ class flat_set {
         this->m_length -= diff;
         return result_it;
       } else {
-        return first;
+        return this->end();
       }
     }
 
