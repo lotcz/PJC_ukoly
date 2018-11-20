@@ -8,5 +8,9 @@ build:
 	$(COMPILER) -std=c++14 main.cpp -o $(PROJECT_NAME)
 	$(PROJECT_NAME).exe
 
+iterator:
+	$(COMPILER) -std=c++14 iterator.cpp -o iterator
+	iterator.exe
+
 clean:
 	if [ -f "$(PROJECT_NAME).exe" ];then rm "$(PROJECT_NAME).exe";fi

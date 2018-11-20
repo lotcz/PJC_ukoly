@@ -1,15 +1,17 @@
 #include <set>
 #include <vector>
 #include <iostream>
+#include <limits>
 
 template <typename T, typename Comparator = std::less<T> >
 class flat_set {
   private:
-    std::vector<T> m_values;
+    T* m_values = nullptr;
+    int m_length = 0;
     Comparator m_comparator;
 
-    typedef typename std::vector<T>::iterator my_iterator;
-    typedef typename std::vector<T>::const_iterator my_const_iterator;
+    typedef T* my_iterator;
+    typedef my_iterator my_const_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
@@ -59,7 +61,7 @@ class flat_set {
 
   public:
     typedef T value_type;
-    typedef typename std::vector<T>::size_type size_type;
+    typedef int size_type;
     typedef my_iterator iterator;
     typedef my_const_iterator const_iterator;
 
@@ -109,39 +111,54 @@ class flat_set {
 
     // Insert overloads
     std::pair<iterator, bool> insert(T const& v) {
-      my_iterator it = this->find_value_iterator(v);
+
+      iterator value_it = this->find_value_iterator(v);
       bool can_insert = false;
-      if (it == this->end()) {
+
+      if (value_it == this->end()) {
         can_insert = true;
       } else {
-        if (!(this->value_equals(*it, v))) {
+        if (!(this->value_equals(*value_it, v))) {
           can_insert = true;
         }
       }
 
       if (can_insert) {
-        return make_pair(this->m_values.insert(it, v), true);
+        T* new_arr = new T[this->m_length+1];
+        iterator new_it = new_arr;
+        iterator old_it = this->begin();
+        iterator result_it;
+
+        while (old_it != value_it) {
+          *new_it = *old_it;
+          new_it++;
+          old_it++;
+        }
+
+        *new_it = v;
+        result_it = new_it;
+        new_it++;
+
+        while (old_it != this->end()) {
+          *new_it = *old_it;
+          new_it++;
+          old_it++;
+        }
+
+        if (this->m_values != nullptr) {
+          delete [] this->m_values;
+        }
+        this->m_values = new_arr;
+        this->m_length++;
+        return std::make_pair(result_it, true);
       } else {
-        return make_pair(it, false);
+        return std::make_pair(value_it, false);
       }
+
     }
 
     std::pair<iterator, bool> insert(T&& v) {
-      my_iterator it = this->find_value_iterator(v);
-      bool can_insert = false;
-      if (it == this->end()) {
-        can_insert = true;
-      } else {
-        if (!(this->value_equals(*it, v))) {
-          can_insert = true;
-        }
-      }
-
-      if (can_insert) {
-        return make_pair(this->m_values.insert(it, std::move(v)), true);
-      } else {
-        return make_pair(it, false);
-      }
+      return insert(v);
     }
 
     // Inserts [first, last) range of elements
@@ -152,11 +169,11 @@ class flat_set {
 
     // Iterator member functions
     iterator begin() noexcept {
-      return this->m_values.begin();
+      return this->m_values;
     }
 
     iterator end() noexcept {
-      return  this->m_values.end();
+      return this->m_values + this->m_length;
     }
 
     const_iterator begin() const noexcept {
@@ -168,11 +185,11 @@ class flat_set {
     }
 
     const_iterator cbegin() const noexcept {
-      return this->m_values.cbegin();
+      return this->m_values;
     }
 
     const_iterator cend() const noexcept {
-      return this->m_values.cend();
+      return this->m_values + this->m_length;
     }
 
     bool empty() const {
@@ -180,19 +197,22 @@ class flat_set {
     }
 
     size_type size() const {
-      return this->m_values.size();
+      return this->m_length;
     }
 
     size_type capacity() const {
-      return this->m_values.capacity();
+      return std::numeric_limits<int>::max();
     }
 
     void reserve(size_type c) {
-      this->m_values.reserve(c);
+      //this->m_values.reserve(c);
     }
 
     void clear() {
-      this->m_values.clear();
+      if (this->m_values != nullptr) {
+        delete [] this->m_values;
+      }
+      this->m_length = 0;
     }
 
     // Lookup member functions
@@ -223,15 +243,49 @@ class flat_set {
       }
     }
 
+    // Deletes elements in range [first, last), returns iterator to the next element
+    iterator erase(const_iterator first, const_iterator last) {
+      if (first != this->cend()) {
+        int diff = last - first + 1;
+        T* new_arr = new T[this->m_length-diff];
+        iterator new_it = new_arr;
+        iterator old_it = this->begin();
+        iterator result_it;
+
+        while (old_it != first) {
+          *new_it = *old_it;
+          new_it++;
+          old_it++;
+        }
+
+        while (old_it != last) {
+          old_it++;
+        }
+
+        old_it++;
+        result_it = old_it;
+        
+        while (old_it != this->end()) {
+          *new_it = *old_it;
+          new_it++;
+          old_it++;
+        }
+
+        if (this->m_values != nullptr) {
+          delete [] this->m_values;
+        }
+        this->m_values = new_arr;
+        this->m_length -= diff;
+        return result_it;
+      } else {
+        return first;
+      }
+    }
+
     // Erase overloads
     // Deletes element pointed-to by i, returns iterator to the next element
     iterator erase(const_iterator i) {
-      return iterator(this->m_values.erase(i));
-    }
-
-    // Deletes elements in range [first, last), returns iterator to the next element
-    iterator erase(const_iterator first, const_iterator last) {
-      return iterator(this->m_values.erase(first, last));
+      return erase(i, i);
     }
 
     // Deletes element equal to key if it is present, returns how many elements were deleted

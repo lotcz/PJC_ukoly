@@ -23,7 +23,7 @@ mem:
 memtest: test mem
 
 simple:
-	$(COMPILER) -g -std=c++11 $(PROJECT_NAME).hpp main.cpp -o $(PROJECT_NAME)
+	$(COMPILER) -g -std=c++14 $(PROJECT_NAME).hpp main.cpp -o $(PROJECT_NAME)
 	$(PROJECT_NAME).exe
 
 create_archive:
