@@ -41,8 +41,9 @@ class flat_set {
       }
 
       MyIterator operator++(int) {
-        m_current += 1;
-        return *this;
+        MyIterator result_it = *this;
+        this->m_current += 1;
+        return result_it;
       }
 
       MyIterator operator+(pointer_diff add) {
@@ -54,13 +55,14 @@ class flat_set {
       }
 
       MyIterator operator--() {
-        m_current -= 1;
+        this->m_current -= 1;
         return *this;
       }
 
       MyIterator operator--(int) {
-        m_current -= 1;
-        return *this;
+        MyIterator result_it = *this;
+        this->m_current -= 1;
+        return result_it;
       }
 
       MyIterator operator-(pointer_diff add) {
@@ -139,12 +141,13 @@ class flat_set {
       }
 
       MyConstIterator operator++(int) {
-        m_current += 1;
-        return *this;
+        MyConstIterator result_it = *this;
+        this->m_current += 1;
+        return result_it;
       }
 
       MyConstIterator operator+(pointer_diff add) {
-        MyIterator result_it = *this;
+        MyConstIterator result_it = *this;
         for (int i = add; i > 0; i--) {
           result_it++;
         }
@@ -157,12 +160,13 @@ class flat_set {
       }
 
       MyConstIterator operator--(int) {
+        MyConstIterator result_it = *this;
         m_current -= 1;
-        return *this;
+        return result_it;
       }
 
       MyConstIterator operator-(pointer_diff add) {
-        MyIterator result_it = *this;
+        MyConstIterator result_it = *this;
         for (pointer_diff i = add; i > 0; i--) {
           result_it--;
         }
