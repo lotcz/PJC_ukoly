@@ -338,7 +338,8 @@ class flat_set {
           old_it++;
         }
 
-        *new_it = v;
+        T value = v;
+        *new_it = value;
         result_it.goTo(new_it);
         new_it++;
 
