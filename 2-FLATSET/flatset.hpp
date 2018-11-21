@@ -309,7 +309,7 @@ class flat_set {
     }
 
     // Insert overloads
-    std::pair<iterator, bool> insert(T const& v) {
+    std::pair<iterator, bool> insert_internal(T const& v) {
 
       iterator value_it = this->find_value_iterator(v);
       bool can_insert = false;
@@ -338,8 +338,7 @@ class flat_set {
           old_it++;
         }
 
-        T value = v;
-        *new_it = value;
+        *new_it = v;
         result_it.goTo(new_it);
         new_it++;
 
@@ -361,8 +360,14 @@ class flat_set {
 
     }
 
+    std::pair<iterator, bool> insert(T const& v) {
+      T value = v;
+      return insert_internal(value);
+    }
+
     std::pair<iterator, bool> insert(T&& v) {
-      return insert(v);
+      T value = std::move(v);
+      return insert_internal(value);
     }
 
     // Inserts [first, last) range of elements
