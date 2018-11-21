@@ -275,15 +275,21 @@ class flat_set {
     }
 
     flat_set<T, Comparator>& operator=(flat_set<T, Comparator> const& rhs) {
-      this->clear();
-      this->from_flat_set(&rhs);
+      if (this != &rhs) {
+        this->clear();
+        this->from_flat_set(&rhs);
+      }
       return *this;
     }
 
-    flat_set<T, Comparator>& operator=(flat_set<T, Comparator> && rhs) = default;
+    flat_set<T, Comparator>& operator=(flat_set<T, Comparator>&& rhs) {
+      this->clear();
+      this->swap(rhs);
+      return *this;
+    }
 
     ~flat_set() {
-        this->clear();
+      this->clear();
     }
 
     Comparator getComparator() const {
@@ -546,17 +552,7 @@ class flat_set {
     }
 
 };
-/*
-template <typename T, typename Comparator>
-bool operator==(typename flat_set<T, Comparator>::iterator const& p1, typename flat_set<T, Comparator>::iterator const& p2) {
-  return (p1.getCurrent() == p2.getCurrent());
-}
 
-template <typename T, typename Comparator>
-bool operator==(typename flat_set<T, Comparator>::iterator const p1, typename flat_set<T, Comparator>::iterator const p2) {
-  return (p1.getCurrent() == p2.getCurrent());
-}
-*/
 /**
 * 0 - equal, 1 = a > b, -1 = a < b
 */
