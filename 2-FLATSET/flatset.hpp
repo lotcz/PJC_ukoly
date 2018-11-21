@@ -7,59 +7,202 @@ template <typename T, typename Comparator = std::less<T> >
 class flat_set {
   private:
     T* m_values = nullptr;
-    int m_length = 0;
+    int m_size = 0;
+    int m_capacity = 0;
     Comparator m_comparator;
 
-    class MyIterator {
+    class MyIterator: public std::iterator<
+                        std::random_access_iterator_tag,   // iterator_category
+                        T,                      // value_type
+                        T,                      // difference_type
+                        const T*,               // pointer
+                        T&                      // reference
+                                      > {
     private:
-      int* m_current = nullptr;
-      flat_set<T, Comparator>* m_set = nullptr;
+      T* m_current = nullptr;
+      const flat_set<T, Comparator>* m_set;
+      typedef unsigned long pointer_diff;
     public:
-      MyIterator(flat_set<T, Comparator>* src, bool is_end) {
-        m_set = src;
-        if (is_end && m_set->m_values != nullptr) {
-          m_current = m_set->m_values+m_set->m_length;
+
+      MyIterator() = default;
+
+      MyIterator(const flat_set<T, Comparator>* src, bool is_end = false) {
+        this->m_set = src;
+        if (is_end && this->m_set->m_values != nullptr) {
+            this->m_current = this->m_set->m_values+m_set->m_size;
         } else {
-          m_current = m_set->m_values;
+            this->m_current = this->m_set->m_values;
         }
       }
 
-      MyIterator(flat_set<T, Comparator>* src) {
-        MyIterator(src, false);
-      }
-
-      MyIterator operator--() {
-         m_current -= 1;
-         return *this;
-      }
-
       MyIterator operator++() {
-         m_current += 1;
-         return *this;
+        m_current += 1;
+        return *this;
       }
 
       MyIterator operator++(int) {
-         m_current += 1;
-         return *this;
+        m_current += 1;
+        return *this;
       }
 
-      MyIterator operator+(int add) {
-         m_current += add;
-         return *this;
+      MyIterator operator+(pointer_diff add) {
+        MyIterator result_it = *this;
+        for (int i = add; i > 0; i--) {
+          result_it++;
+        }
+        return result_it;
       }
 
-
-      T operator*() {
-         return *m_current;
+      MyIterator operator--() {
+        m_current -= 1;
+        return *this;
       }
 
-      bool operator!=(MyIterator other) {
+      MyIterator operator--(int) {
+        m_current -= 1;
+        return *this;
+      }
+
+      MyIterator operator-(pointer_diff add) {
+        MyIterator result_it = *this;
+        for (pointer_diff i = add; i > 0; i--) {
+          result_it--;
+        }
+        return result_it;
+      }
+
+      pointer_diff operator-(MyIterator other) {
+        return this->m_current - other.m_current;
+      }
+
+      T& operator*() {
+        return *m_current;
+      }
+
+      bool operator!=(MyIterator const& other) const {
         return (this->m_current != other.m_current);
+      }
+
+      bool operator==(MyIterator const& other) const {
+        return (this->m_current == other.m_current);
+      }
+
+      void goTo(T* position) {
+        this->m_current = position;
+      }
+
+      void goTo(MyIterator& other) {
+        this->m_current = other.m_current;
+      }
+
+      T* getCurrent() const {
+        return this->m_current;
+      }
+
+      const flat_set<T, Comparator>* getSet() const {
+        return this->m_set;
+      }
+    };
+
+    class MyConstIterator: public std::iterator<
+                        std::random_access_iterator_tag,   // iterator_category
+                        const T,                      // value_type
+                        const T,                      // difference_type
+                        const T*,               // pointer
+                        const T                      // reference
+                                      > {
+    private:
+      T* m_current = nullptr;
+      const flat_set<T, Comparator>* m_set;
+      typedef unsigned long pointer_diff;
+    public:
+
+      MyConstIterator() = default;
+
+      MyConstIterator(const flat_set<T, Comparator>* src, bool is_end = false) {
+        this->m_set = src;
+        if (is_end && this->m_set->m_values != nullptr) {
+            this->m_current = this->m_set->m_values+m_set->m_size;
+        } else {
+            this->m_current = this->m_set->m_values;
+        }
+      }
+
+      MyConstIterator(const MyIterator& other) {
+        this->m_set = other.getSet();
+        this->m_current = other.getCurrent();
+      }
+
+      MyConstIterator operator++() {
+        m_current += 1;
+        return *this;
+      }
+
+      MyConstIterator operator++(int) {
+        m_current += 1;
+        return *this;
+      }
+
+      MyConstIterator operator+(pointer_diff add) {
+        MyIterator result_it = *this;
+        for (int i = add; i > 0; i--) {
+          result_it++;
+        }
+        return result_it;
+      }
+
+      MyConstIterator operator--() {
+        m_current -= 1;
+        return *this;
+      }
+
+      MyConstIterator operator--(int) {
+        m_current -= 1;
+        return *this;
+      }
+
+      MyConstIterator operator-(pointer_diff add) {
+        MyIterator result_it = *this;
+        for (pointer_diff i = add; i > 0; i--) {
+          result_it--;
+        }
+        return result_it;
+      }
+
+      pointer_diff operator-(MyConstIterator other) {
+        return this->m_current - other.m_current;
+      }
+
+      const T operator*() {
+        //return static_cast<T>(*m_current);
+        return *m_current;
+      }
+
+      bool operator!=(MyConstIterator const& other) const {
+        return (this->m_current != other.m_current);
+      }
+
+      bool operator==(MyConstIterator const& other) const {
+        return (this->m_current == other.m_current);
+      }
+
+      MyConstIterator& operator=(const MyIterator& other) {
+        MyConstIterator it = MyConstIterator(this->m_set);
+        it.goTo(other->m_current);
+        return it;
+      }
+
+      void goTo(T* position) {
+        this->m_current = position;
+      }
+
+      void goTo(MyConstIterator other) {
+        this->m_current = other.m_current;
       }
     };
 
     typedef MyIterator my_iterator;
-    typedef MyIterator my_const_iterator;
+    typedef MyConstIterator my_const_iterator;
 
     static bool values_equal(Comparator cmp, T const& v1, T const& v2) {
       return (!(cmp(v1, v2) || (cmp(v2, v1))));
@@ -70,7 +213,7 @@ class flat_set {
       return values_equal(cmp, v1, v2);
     }
 
-    bool value_equals(T const& v1, T const& v2) {
+    bool value_equals(T const& v1, T const& v2) const {
       return values_equal(this->m_comparator, v1, v2);
     }
 
@@ -82,7 +225,7 @@ class flat_set {
       return it;
     }
 
-    my_const_iterator find_value_const_iterator(T const& value) {
+    my_const_iterator find_value_const_iterator(T const& value) const {
       my_const_iterator it = this->cbegin();
       while (it != this->cend() && (this->m_comparator(*it, value))) {
         it++;
@@ -133,12 +276,10 @@ class flat_set {
       return *this;
     }
 
-    flat_set<T, Comparator>& operator=(flat_set<T, Comparator> && rhs) {
-      return rhs;
-    }
+    flat_set<T, Comparator>& operator=(flat_set<T, Comparator> && rhs) = default;
 
     ~flat_set() {
-
+        this->clear();
     }
 
     Comparator getComparator() const {
@@ -172,10 +313,14 @@ class flat_set {
       }
 
       if (can_insert) {
-        T* new_arr = new T[this->m_length+1];
-        iterator new_it = new_arr;
+        size_type new_size = this->m_size + 1;
+        if (this->m_capacity < new_size) {
+          this->m_capacity = new_size;
+        }
+        T* new_arr = new T[this->m_capacity];
+        T* new_it = new_arr;
         iterator old_it = this->begin();
-        iterator result_it;
+        iterator result_it = MyIterator(this);
 
         while (old_it != value_it) {
           *new_it = *old_it;
@@ -184,7 +329,7 @@ class flat_set {
         }
 
         *new_it = v;
-        result_it = new_it;
+        result_it.goTo(new_it);
         new_it++;
 
         while (old_it != this->end()) {
@@ -197,7 +342,7 @@ class flat_set {
           delete [] this->m_values;
         }
         this->m_values = new_arr;
-        this->m_length++;
+        this->m_size = new_size;
         return std::make_pair(result_it, true);
       } else {
         return std::make_pair(value_it, false);
@@ -217,12 +362,11 @@ class flat_set {
 
     // Iterator member functions
     iterator begin() noexcept {
-      return this->m_values;
+      return MyIterator(this);
     }
 
     iterator end() noexcept {
-      iterator it = this->m_values + this->m_length;
-      return it;
+      return MyIterator(this, true);
     }
 
     const_iterator begin() const noexcept {
@@ -234,11 +378,11 @@ class flat_set {
     }
 
     const_iterator cbegin() const noexcept {
-      return this->m_values;
+      return MyConstIterator(this);
     }
 
     const_iterator cend() const noexcept {
-      return this->m_values + this->m_length;
+      return MyConstIterator(this, true);
     }
 
     bool empty() const {
@@ -246,22 +390,24 @@ class flat_set {
     }
 
     size_type size() const {
-      return this->m_length;
+      return this->m_size;
     }
 
     size_type capacity() const {
-      return std::numeric_limits<int>::max();
+      return this->m_capacity;
     }
 
     void reserve(size_type c) {
-      //this->m_values.reserve(c);
+      if (c > this->m_capacity) {
+        this->m_capacity = c;
+      }
     }
 
     void clear() {
       if (this->m_values != nullptr) {
         delete [] this->m_values;
       }
-      this->m_length = 0;
+      this->m_size = 0;
     }
 
     // Lookup member functions
@@ -279,7 +425,7 @@ class flat_set {
       }
     }
 
-    const_iterator find(T const& v) const {
+    const_iterator cfind(T const& v) const {
       const_iterator it = this->find_value_const_iterator(v);
       if (it == this->cend()) {
         return it;
@@ -292,39 +438,54 @@ class flat_set {
       }
     }
 
+    const_iterator find(T const& v) const {
+      return this->cfind(v);
+    }
+
     // Deletes elements in range [first, last), returns iterator to the next element
     iterator erase(const_iterator first, const_iterator last) {
       if (first != this->cend()) {
         int diff = last - first + 1;
-        T* new_arr = new T[this->m_length-diff];
-        iterator new_it = new_arr;
-        iterator old_it = this->begin();
-        iterator result_it;
+        int new_size = this->m_size - diff;
+        T* new_arr;
+        iterator result_it = iterator(this);
+        if (new_size > 0) {
+          new_arr = new T[this->m_capacity];
+          T* new_it = new_arr;
+          const_iterator old_it = this->cbegin();
 
-        while (old_it != first) {
-          *new_it = *old_it;
-          new_it++;
-          old_it++;
-        }
+          while (old_it != first && old_it != this->cend()) {
+            *new_it = *old_it;
+            new_it++;
+            old_it++;
+          }
 
-        while (old_it != last) {
-          old_it++;
-        }
+          while (old_it != last && old_it != this->cend()) {
+            old_it++;
+          }
 
-        old_it++;
-        result_it = old_it;
+          if (old_it != this->cend()) {
+            old_it++;
+          }
+          result_it.goTo(new_it);
 
-        while (old_it != this->end()) {
-          *new_it = *old_it;
-          new_it++;
-          old_it++;
+          while (old_it != this->cend()) {
+            *new_it = *old_it;
+            new_it++;
+            old_it++;
+          }
+
+        } else {
+          new_arr = nullptr;
+          new_size = 0;
+          result_it.goTo(new_arr);
         }
 
         if (this->m_values != nullptr) {
           delete [] this->m_values;
         }
         this->m_values = new_arr;
-        this->m_length -= diff;
+        this->m_size = new_size;
         return result_it;
       } else {
         return this->end();
@@ -339,11 +500,11 @@ class flat_set {
 
     // Deletes element equal to key if it is present, returns how many elements were deleted
     size_type erase(value_type const& key) {
-      iterator it = this->find(key);
+      const_iterator it = this->cfind(key);
       size_type size = 0;
-      while (it != this->end() && (*it == key)) {
-        it = this->erase(it);
-        size++;
+      if (it != this->cend()) {
+        this->erase(it);
+        size = 1;
       }
       return size;
     }
@@ -381,7 +542,17 @@ class flat_set {
     }
 
 };
+/*
+template <typename T, typename Comparator>
+bool operator==(typename flat_set<T, Comparator>::iterator const& p1, typename flat_set<T, Comparator>::iterator const& p2) {
+  return (p1.getCurrent() == p2.getCurrent());
+}
 
+template <typename T, typename Comparator>
+bool operator==(typename flat_set<T, Comparator>::iterator const p1, typename flat_set<T, Comparator>::iterator const p2) {
+  return (p1.getCurrent() == p2.getCurrent());
+}
+*/
 /**
 * 0 - equal, 1 = a > b, -1 = a < b
 */

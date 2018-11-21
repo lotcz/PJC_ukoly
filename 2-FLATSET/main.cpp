@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "flatset.hpp"
-#include "tests-helpers.cpp"
+#include "tests-helpers.hpp"
 #include "../output.cpp"
 
 template <typename T>
@@ -41,29 +41,20 @@ unsigned MyKey::s_nconstructs = 0;
 
 int main() {
   try {
+    flat_set<int> fs2;
+    output("size 0", fs2.size());
 
-    flat_set<int> fs;
-    fs.insert(1);
-    fs.insert(5);
-    fs.insert(3);
-    fs.insert(5);
-    fs.insert(1);
-    fs.insert(4);
-    output_set("after insert", &fs );
-    fs.erase(1);
-    fs.erase(4);
-    output_set("after erase", &fs );
+    fs2.insert(42);
+    output("size 1", fs2.size());
+    output("capacity", fs2.capacity());
+    output("size", fs2.size());
 
-    auto it = fs.find(5);
-    if (it != fs.end()) {
-      output_iterator("find", it, (it+1) );
-    }
+    fs2.clear();
+    output("size after clear", fs2.size());
 
-    flat_set<int>::iterator end = fs.end();
-
-    output_iterator("last", --end, end );
-
+    fs2.reserve(1024);
+    output("capacity after reserve", fs2.capacity());
   } catch (std::exception e) {
-    output_field("ex:", e.what());
+    output_field("ex", e.what());
   }
 }
