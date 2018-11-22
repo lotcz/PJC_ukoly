@@ -23,6 +23,10 @@ mem:
 memtest: test mem
 
 simple:
+	$(COMPILER) -g -std=c++14 tests-main.o tests-helpers.o $(PROJECT_NAME).hpp simple.cpp -o simple
+	simple.exe
+
+main:
 	$(COMPILER) -g -std=c++14 $(PROJECT_NAME).hpp main.cpp -o $(PROJECT_NAME)
 	$(PROJECT_NAME).exe
 

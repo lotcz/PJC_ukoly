@@ -9,4 +9,4 @@ add_executable(2_FLATSET
         flatset.hpp
         tests-main.cpp
         tests-helpers.cpp
-        test_flatset.cpp)
+        simple.cpp)
