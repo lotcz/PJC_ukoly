@@ -552,9 +552,18 @@ class flat_set {
     }
 
     void swap(flat_set<T, Comparator>& o) {
-      flat_set<T, Comparator> f3 = flat_set<T, Comparator>(o);
-      o.from_flat_set(this);
-      this->from_flat_set(&f3);
+      T* values = o.m_values;
+      size_type size = o.m_size;
+      size_type capacity = o.m_capacity;
+      Comparator comparator = o.m_comparator;
+      o.m_values = this->m_values;
+      o.m_size = this->m_size;
+      o.m_capacity = this->m_capacity;
+      o.m_comparator = this->m_comparator;
+      this->m_values = values;
+      this->m_size = size;
+      this->m_capacity = capacity;
+      this->m_comparator = comparator;
     }
 
 };
