@@ -423,7 +423,9 @@ class flat_set {
       if (this->m_values != nullptr) {
         delete [] this->m_values;
       }
+      this->m_values = nullptr;
       this->m_size = 0;
+      this->m_capacity = 0;
     }
 
     // Lookup member functions
