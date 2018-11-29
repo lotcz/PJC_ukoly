@@ -7,14 +7,26 @@
 static const size_t num_chars = 128;
 
 struct trie_node {
+
+    // pole ukazatelů na přímé následovníky daného uzlu
     trie_node* children[num_chars] = {};
+
+    // ukazatel na přímého předka daného uzlu
     trie_node* parent = nullptr;
+
+    // znak, který tento uzel reprezentuje
     char payload = 0;
+
+    // označuje, jestli v tomto uzlu končí slovo
     bool is_terminal = false;
 };
 
 struct trie {
+
+    // ukazatel na kořenový uzel stromu
     trie_node* root = nullptr;
+
+    // počet unikátních slov, které trie obsahuje
     size_t size = 0;
 };
 

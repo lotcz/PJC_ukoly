@@ -23,7 +23,7 @@ void insert_all(trie& trie, const std::vector<std::string>& items) {
 }
 
 /**
- * Returns true if given string is in the trie
+ * Returns true iff given string is in the trie
  */
 bool contains(const trie& trie, const std::string& str) {
     return true;
@@ -40,7 +40,7 @@ size_t size(const trie& trie) {
  * Returns whether given trie is empty (contains no strings)
  */
 bool empty(const trie& trie) {
-    return true;
+    return (trie.size == 0);
 }
 
 /**
