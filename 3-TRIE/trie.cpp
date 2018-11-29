@@ -27,17 +27,18 @@ trie_node* create_node(trie_node* parent, const char payload) {
 */
 bool insert_to_node(trie_node* node, const char* s) {
   bool inserted = false;
-  if (node->children[*s] == nullptr) {
-    node->children[*s] = create_node(node, *s);
+  size_t index = *s;
+  if (node->children[index] == nullptr) {
+    node->children[index] = create_node(node, *s);
     inserted = true;
   }
   if (*(s+1) == 0) {
-    if (!node->children[*s]->is_terminal) {
-      node->children[*s]->is_terminal = true;
+    if (!node->children[index]->is_terminal) {
+      node->children[index]->is_terminal = true;
       inserted = true;
     }
   } else {
-    inserted = insert_to_node(node->children[*s], (s+1));
+    inserted = insert_to_node(node->children[index], (s+1));
   }
   return inserted;
 }
@@ -54,7 +55,6 @@ bool insert(trie& trie, const std::string& str) {
     if (*s == 0) {
       inserted = true;
       trie.root->is_terminal = true;
-      trie.size = 1;
     }
   }
   if (!inserted) {
@@ -91,9 +91,10 @@ bool contains(const trie& trie, const std::string& str) {
   } else {
     const char* s = str.c_str();
     trie_node* node = trie.root;
-    int i;
+    size_t index;
     while ((*s != 0) && (node != nullptr)) {
-      node = node->children[*s];
+      index = *s;
+      node = node->children[index];
       s++;
     }
     return (*s == 0 && node->is_terminal);
@@ -114,28 +115,68 @@ bool empty(const trie& trie) {
   return (trie.size == 0);
 }
 
+bool node_has_children(trie_node* node) {
+  size_t i = 0;
+  while (i < num_chars && node->children[i] == nullptr) {
+    i++;
+  }
+  return (i < num_chars);
+}
+
+void delete_node(trie_node* node) {
+  trie_node* parent = node->parent;
+  size_t index = node->payload;
+  deallocate_node(node);
+  if (parent != nullptr) {
+    parent->children[index] = nullptr;
+  }
+}
+
 /**
  * Removes given string from the trie
  * Returns true iff string was removed (it was present in the trie).
  */
 bool erase(trie& trie, const std::string& str) {
-  bool deleted = false;
-  const char* s = str.c_str();
+  bool found = false;
+
   trie_node* node = trie.root;
-  while (*s) {
-    s++;
-  }
   if (node != nullptr) {
-    for (int i = 0, max = num_chars; i < num_chars; i++) {
-      deallocate_node(node->children[i]);
+    const char* s = str.c_str();
+    size_t index;
+    while ((*s != 0) && (node != nullptr)) {
+      index = *s;
+      node = node->children[index];
+      s++;
+    }
+    found = (*s == 0 && node->is_terminal);
+  }
+
+  if (found) {
+    if (trie.size == 1) {
+      deallocate(trie);
+    } else {
+      if (node_has_children(node)) {
+        node->is_terminal = false;
+      } else {
+        trie_node* node_to_delete = node;
+        node = node->parent;
+        delete_node(node_to_delete);
+        while (!node->is_terminal && !node_has_children(node)) {
+          node_to_delete = node;
+          node = node->parent;
+          delete_node(node_to_delete);
+        }
+      }
+      trie.size--;
     }
   }
-  return deleted;
+
+  return found;
 }
 
 void deallocate_node(trie_node* node) {
   if (node != nullptr) {
-    for (int i = 0; i < num_chars; i++) {
+    for (size_t i = 0; i < num_chars; i++) {
       deallocate_node(node->children[i]);
     }
     delete node;

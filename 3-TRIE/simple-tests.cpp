@@ -2,42 +2,32 @@
 #include "tests-helpers.hpp"
 #include "catch.hpp"
 
-TEST_CASE("Basics: inserts") {
+TEST_CASE("Basics: erase") {
     trie trie;
     init(trie);
+    scope_guard sg([&] () { deallocate(trie); });
 
-    SECTION("Empty trie") {
-        REQUIRE_FALSE(contains(trie, ""));
+    SECTION("My") {
         REQUIRE(size(trie) == 0);
-        REQUIRE(empty(trie));
-    }
-
-    SECTION("Trivial inserts") {
-        REQUIRE(insert(trie, "abcd"));
-        REQUIRE(contains(trie, "abcd"));
-        REQUIRE_FALSE(contains(trie, ""));
-        REQUIRE_FALSE(contains(trie, "a"));
-        REQUIRE_FALSE(contains(trie, "ab"));
-        REQUIRE_FALSE(contains(trie, "abc"));
+        insert(trie, "");
         REQUIRE(size(trie) == 1);
-
-        REQUIRE(insert(trie, "abc"));
-        REQUIRE(contains(trie, "abc"));
+        insert(trie, "a");
         REQUIRE(size(trie) == 2);
-
-        REQUIRE_FALSE(empty(trie));
+        insert(trie, "ab");
+        REQUIRE(size(trie) == 3);
     }
 
-    SECTION("Insert all") {
-        insert_all(trie, {"abc", "bc", "a", "bc", "d", "", "d", "abcd", "abc"});
-        REQUIRE(size(trie) == 6);
-        REQUIRE(contains(trie, ""));
-        REQUIRE(contains(trie, "a"));
-        REQUIRE(contains(trie, "d"));
-        REQUIRE_FALSE(contains(trie, "b"));
-        REQUIRE(contains(trie, "bc"));
+    SECTION("Erase in the middle") {
+        insert_all(trie, {"", "a", "ab", "abc", "abcd"});
+        REQUIRE(size(trie) == 5);
+        REQUIRE(erase(trie, "ab"));
+        REQUIRE(size(trie) == 4);
         REQUIRE_FALSE(contains(trie, "ab"));
-        REQUIRE(contains(trie, "abc"));
+
+        REQUIRE(erase(trie, "abc"));
+        REQUIRE(size(trie) == 3);
+        REQUIRE_FALSE(contains(trie, "abc"));
+
         REQUIRE(contains(trie, "abcd"));
     }
 }
