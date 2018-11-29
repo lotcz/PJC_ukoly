@@ -14,6 +14,10 @@ test:
 	$(COMPILER) -g -std=c++14 tests-main.o $(PROJECT_NAME)-tests.cpp $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
+simple:
+	$(COMPILER) -g -std=c++14 tests-main.o simple-tests.cpp $(PROJECT_NAME).cpp -o simple-test
+	simple-test.exe
+
 mem:
 	drmemory $(PROJECT_NAME)-test.exe
 
