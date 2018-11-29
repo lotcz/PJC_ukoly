@@ -14,6 +14,9 @@ test:
 	$(COMPILER) -g -std=c++14 tests-main.o $(PROJECT_NAME)-tests.cpp $(PROJECT_NAME).cpp -o $(PROJECT_NAME)-test
 	$(PROJECT_NAME)-test.exe
 
+mem:
+	drmemory $(PROJECT_NAME)-test.exe
+
 memtest: test mem
 
 create_archive:
