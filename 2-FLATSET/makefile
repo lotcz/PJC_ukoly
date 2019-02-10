@@ -1,7 +1,7 @@
 PROJECT_NAME = flatset
 ARCHIVE_NAME = $(PROJECT_NAME).zip
 DEST_DIR = result
-COMPILER = x86_64-w64-mingw32-g++.exe#mingw32-g++.exe #g++
+COMPILER = g++
 
 default: create_archive
 
@@ -12,7 +12,7 @@ build:
 
 test:
 	$(COMPILER) -g -std=c++14 tests-main.o tests-helpers.o test_$(PROJECT_NAME).cpp $(PROJECT_NAME).hpp -o $(PROJECT_NAME)-test
-	$(PROJECT_NAME)-test.exe
+	./$(PROJECT_NAME)-test
 
 debug:
 	gdb $(PROJECT_NAME)-test.exe
@@ -28,7 +28,7 @@ simple:
 
 main:
 	$(COMPILER) -g -std=c++14 $(PROJECT_NAME).hpp main.cpp -o $(PROJECT_NAME)
-	$(PROJECT_NAME).exe
+	$(PROJECT_NAME)
 
 create_archive:
 	if [ -f "$(ARCHIVE_NAME)" ];then rm "$(ARCHIVE_NAME)";fi
